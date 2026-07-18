@@ -19,13 +19,6 @@ typedef struct
 
 typedef struct
 {
-    key_list_entry* list;
-    size_t capacity;
-
-} key_list;
-
-typedef struct
-{
     void* key;
     void* value;
     size_t key_len;
