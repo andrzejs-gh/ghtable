@@ -73,7 +73,46 @@ void test_random_keys(ghtable* ght, size_t n)
     }
 }
 
-void delete_keys_and_shrink(ghtable* ght)
+void test_key(ghtable* ght, const void* key, size_t key_len)
+{
+    size_t* value_ptr = ghtable_getn(ght, key, key_len);
+    if ( !value_ptr )
+        puts("Invalid key.");
+    else
+        printf("Retrieved value: %zu \n", *value_ptr);
+}
+
+void shrink_table(ghtable* ght)
+{
+    printf( "Table size in memory: %zu \n", ght->capacity*sizeof(ghtable_entry) );
+    printf( "Key list size in memory: %zu \n",
+            ght->key_list_capacity*sizeof(key_list_entry) );
+
+    size_t table_after_shrink = (size_t)(ght->count / LOAD_FACTOR) *
+                                            sizeof(ghtable_entry);
+    size_t kl_after_shrink = ght->count * sizeof(key_list_entry);
+
+
+    if (!ghtable_shrink(ght))
+    {
+        puts("Failure during table shrinking.");
+        return;
+    }
+
+    printf( "Expected table size after shrinking: %zu \n", table_after_shrink );
+    printf( "Table shrunk to: %zu \n", ght->capacity*sizeof(ghtable_entry) );
+    if ( table_after_shrink != ght->capacity*sizeof(ghtable_entry) )
+        puts("Error, table size after shrinking differs from expected value!");
+
+    printf( "Expected key list size after shrinking: %zu \n", kl_after_shrink );
+    printf( "Key list shrunk to: %zu \n",
+            ght->key_list_capacity*sizeof(key_list_entry) );
+    if ( kl_after_shrink != ght->key_list_capacity*sizeof(key_list_entry) )
+        puts("Error, key list size after shrinking differs from expected value!");
+
+}
+
+void delete_keys(ghtable* ght)
 {
     size_t rand_keys[5];
     for ( int i = 0; i < 5; i++ )
@@ -81,64 +120,63 @@ void delete_keys_and_shrink(ghtable* ght)
 
     puts("Generated 5 random keys:\n");
     for ( int i = 0; i < 5; i++ )
-        printf("key %zu \n", rand_keys[i]);
+    {
+        if ( rand_keys[i] % 2 == 0 )
+            printf("%zu \n", rand_keys[i]);
+        else
+            printf("\"key %zu\" \n", rand_keys[i]);
+    }
     putchar('\n');
 
     char key[32];
 
+    puts("Deleting corresponding entries...");
     for ( size_t i = 0; i < 5; i++ )
     {
-        if ( i % 2 == 0 )
+        if ( rand_keys[i] % 2 == 0 )
         {
-            if ( !ghtable_deln(ght, &i, sizeof i) )
-                printf("Deleted key %zu \n", rand_keys[i]);
+            if ( !ghtable_deln(ght, &rand_keys[i], sizeof(size_t) ) )
+                printf("Deleted entry for: %zu \n", rand_keys[i]);
             else
-                printf("Failed to delete key %zu \n", rand_keys[i]);
+                printf("Failed to delete entry for: %zu \n", rand_keys[i]);
         }
         else
         {
-            sprintf(key, "key %zu", i);
+            sprintf(key, "key %zu", rand_keys[i]);
             if ( !ghtable_del(ght, key) )
-                printf("Deleted key %zu \n", rand_keys[i]);
+                printf("Deleted entry for: \"%s\" \n", key);
             else
-                printf("Failed to delete key %zu \n", rand_keys[i]);
+                printf("Failed to delete entry for: \"%s\" \n", key);
         }
     }
+    putchar('\n');
 
-    printf( "Table size in memory: %zu \n", ght->capacity*sizeof(ghtable_entry) );
-    printf( "Key list size in memory: %zu \n",
-            ght->key_list_capacity*sizeof(key_list_entry) );
-    if (!ghtable_shrink(ght))
-    {
-        puts("Failure during table shrinking.");
-        return;
-    }
-    printf( "Table shrunk to: %zu \n", ght->capacity*sizeof(ghtable_entry) );
-    printf( "Key list shrunk to: %zu \n",
-            ght->key_list_capacity*sizeof(key_list_entry) );
+    puts("Beginning table shrinking test...");
+    shrink_table(ght);
+    putchar('\n');
 
     puts("Trying to retrieve deleted keys:");
 
     for ( size_t i = 0; i < 5; i++ )
     {
-        if ( i % 2 == 0 )
+        if ( rand_keys[i] % 2 == 0 )
         {
-            if ( !ghtable_getn(ght, &i, sizeof i) )
-                printf("[Ok] table does not return an entry for key: %zu", i);
+            if ( !ghtable_getn(ght, &rand_keys[i], sizeof(size_t)) )
+                printf("[Ok] table does not return an entry for key: %zu \n", rand_keys[i]);
             else
-                printf("Error, table returns an entry for key: %zu", i);
+                printf("Error, table returns an entry for key: %zu \n", rand_keys[i]);
         }
         else
         {
-            sprintf(key, "key %zu", i);
-            if ( !ghtable_del(ght, key) )
-                printf("[Ok] table does not return an entry for key: \"%s\"", key);
+            sprintf(key, "key %zu", rand_keys[i]);
+            if ( !ghtable_get(ght, key) )
+                printf("[Ok] table does not return an entry for key: \"%s\" \n", key);
             else
-                printf("Error, table returns an entry for key: \"%s\"", key);
+                printf("Error, table returns an entry for key: \"%s\" \n", key);
         }
     }
 
-    // testing 5 random keys
+    putchar('\n');
     test_random_keys(ght, 5);
 }
 
@@ -148,7 +186,7 @@ int main(void)
     insert_elements(ght, 1000000);
 
     test_random_keys(ght, 100);
-    delete_keys_and_shrink(ght);
+    delete_keys(ght);
 
     return 0;
 }
