@@ -214,10 +214,10 @@ ghtable* ghtable_shrink(ghtable* ght)
 
     if ( ght->keys )
     {
-        size_t kl_new_capacity = ght->count*sizeof(key_list_entry);
+        size_t kl_new_size = ght->count*sizeof(key_list_entry);
         key_list_entry* keys = ght->keys;
 
-        keys = realloc( keys, kl_new_capacity );
+        keys = realloc( keys, kl_new_size );
         if ( !keys )
         {
             free(new_table);
@@ -225,7 +225,7 @@ ghtable* ghtable_shrink(ghtable* ght)
         }
 
         ght->keys = keys;
-        ght->key_list_capacity = kl_new_capacity;
+        ght->key_list_capacity = ght->count;
     }
 
     ghtable_entry* old_table = ght->table;
