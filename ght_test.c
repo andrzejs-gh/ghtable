@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "ghtable.h"
 #include "time_exec.h"
@@ -82,6 +83,20 @@ void test_key(ghtable* ght, const void* key, size_t key_len)
         printf("Retrieved value: %zu \n", *value_ptr);
 }
 
+void test_random_key_indexes(ghtable* ght, size_t n)
+{
+    for ( int i = 0; i < n; i++ )
+    {
+        size_t index = (size_t)(random() % ght->count );
+        size_t* value;
+
+        if ( (value = ghtable_get_nth(ght, index) ) )
+            printf("Key at index %zu returns value %zu \n", index, *value);
+        else
+            printf("[ Error ] Index %zu is invalid. \n", index);
+    }
+}
+
 void shrink_table(ghtable* ght)
 {
     printf( "Table size in memory: %zu \n", ght->capacity*sizeof(ghtable_entry) );
@@ -118,7 +133,7 @@ void delete_keys(ghtable* ght)
     for ( int i = 0; i < 5; i++ )
         rand_keys[i] = random() % ght->count;
 
-    puts("Generated 5 random keys:\n");
+    puts("Generated 5 random keys:");
     for ( int i = 0; i < 5; i++ )
     {
         if ( rand_keys[i] % 2 == 0 )
@@ -172,7 +187,7 @@ void delete_keys(ghtable* ght)
             if ( !ghtable_get(ght, key) )
                 printf("[Ok] table does not return an entry for key: \"%s\" \n", key);
             else
-                printf("Error, table returns an entry for key: \"%s\" \n", key);
+                printf("[ Error ] table returns an entry for key: \"%s\" \n", key);
         }
     }
 
@@ -180,13 +195,35 @@ void delete_keys(ghtable* ght)
     test_random_keys(ght, 5);
 }
 
+void iterate_over_key_list(ghtable* ght)
+{
+    key_list_entry* keys = ght->keys;
+    for ( size_t i = 0; i < ght->count; i++ )
+    {
+        if ( i % 2 == 0 )
+            printf("Index: %zu, key: %zu \n", i, *(size_t*)keys[i].key);
+        else
+            printf("index: %zu, key: \"%s\" \n", i, (char*)keys[i].key);
+    }
+}
+
 int main(void)
 {
+    srandom((unsigned)time(NULL));
+
     ghtable* ght = new_ghtable(1, ORD);
-    insert_elements(ght, 1000000);
+    size_t n = 1000000;
+
+    printf("Inserting %zu entries... \n", n);
+    insert_elements(ght, n);
 
     test_random_keys(ght, 100);
+
+    printf("\nTesting keys deletion... \n ");
     delete_keys(ght);
+
+    printf("Testing key indexes... \n");
+    test_random_key_indexes(ght, 5);
 
     return 0;
 }
