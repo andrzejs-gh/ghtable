@@ -35,7 +35,7 @@ void insert_elements(ghtable* ght, size_t n)
 
 void test_random_keys(ghtable* ght, size_t n)
 {
-    size_t count = ght->count;
+    size_t count = ghtable_count(ght);
     char key[32];
     size_t i;
     double t;
@@ -85,9 +85,10 @@ void test_key(ghtable* ght, const void* key, size_t key_len)
 
 void test_random_key_indexes(ghtable* ght, size_t n)
 {
+    size_t ght_count = ghtable_count(ght);
     for ( int i = 0; i < n; i++ )
     {
-        size_t index = (size_t)(random() % ght->count );
+        size_t index = (size_t)(random() % ght_count );
         size_t* value;
 
         if ( (value = ghtable_get_nth(ght, index) ) )
@@ -99,14 +100,11 @@ void test_random_key_indexes(ghtable* ght, size_t n)
 
 void shrink_table(ghtable* ght)
 {
-    printf( "Table size in memory: %zu \n", ght->capacity*sizeof(ghtable_entry) );
-    printf( "Key list size in memory: %zu \n",
-            ght->key_list_capacity*sizeof(key_list_entry) );
+    printf( "Table size in memory: %zu \n", ghtable_size(ght) );
+    printf( "Key list size in memory: %zu \n", ghtable_key_list_size(ght) );
 
-    size_t table_after_shrink = (size_t)(ght->count / LOAD_FACTOR) *
-                                            sizeof(ghtable_entry);
-    size_t kl_after_shrink = ght->count * sizeof(key_list_entry);
-
+    size_t table_after_shrink = ghtable_shrink_size(ght);
+    size_t kl_after_shrink = ghtable_key_list_shrink_size(ght);
 
     if (!ghtable_shrink(ght))
     {
@@ -115,23 +113,24 @@ void shrink_table(ghtable* ght)
     }
 
     printf( "Expected table size after shrinking: %zu \n", table_after_shrink );
-    printf( "Table shrunk to: %zu \n", ght->capacity*sizeof(ghtable_entry) );
-    if ( table_after_shrink != ght->capacity*sizeof(ghtable_entry) )
+    printf( "Table shrunk to: %zu \n", ghtable_size(ght));
+    if ( table_after_shrink != ghtable_size(ght) )
         puts("Error, table size after shrinking differs from expected value!");
 
     printf( "Expected key list size after shrinking: %zu \n", kl_after_shrink );
     printf( "Key list shrunk to: %zu \n",
-            ght->key_list_capacity*sizeof(key_list_entry) );
-    if ( kl_after_shrink != ght->key_list_capacity*sizeof(key_list_entry) )
+            ghtable_key_list_size(ght) );
+    if ( kl_after_shrink != ghtable_key_list_size(ght) )
         puts("Error, key list size after shrinking differs from expected value!");
 
 }
 
 void delete_keys(ghtable* ght)
 {
+    size_t ght_count = ghtable_count(ght);
     size_t rand_keys[5];
     for ( int i = 0; i < 5; i++ )
-        rand_keys[i] = random() % ght->count;
+        rand_keys[i] = random() % ght_count;
 
     puts("Generated 5 random keys:");
     for ( int i = 0; i < 5; i++ )
@@ -197,7 +196,7 @@ void delete_keys(ghtable* ght)
 
 void iterate_over_key_list(ghtable* ght, size_t n)
 {
-    key_list_entry* keys = ght->keys;
+    const key_list_entry* keys = ghtable_key_list(ght);
     for ( size_t i = 0; i < n; i++ )
     {
         if ( i % 2 == 0 )

@@ -19,25 +19,23 @@ typedef struct
 
 typedef struct
 {
-    void* key;
     void* value;
-    size_t key_len;
-    size_t value_size;
-    size_t hash;
+    size_t size;
 
-} ghtable_entry;
+} value_view;
 
-typedef struct
-{
-    size_t count;
-    size_t capacity;
-    ghtable_entry* table;
-    // -----------------
-    size_t key_list_capacity;
-    key_list_entry* keys;
+typedef struct ghtable ghtable;
+typedef struct ghtable_entry ghtable_entry;
 
-} ghtable;
+size_t ghtable_capacity(ghtable* ght);
+size_t ghtable_count(ghtable* ght);
 
+size_t ghtable_size(ghtable* ght);
+size_t ghtable_shrink_size(ghtable* ght);
+size_t ghtable_key_list_size(ghtable* ght);
+size_t ghtable_key_list_shrink_size(ghtable* ght);
+
+const key_list_entry* ghtable_key_list(ghtable* ght);
 ghtable* new_ghtable(size_t est_init_count, char type);
 void free_ghtable(ghtable* ght);
 ghtable_entry* ghtable_get_entry(ghtable* ght, const void* key, size_t key_size);

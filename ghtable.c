@@ -5,6 +5,26 @@
 
 #include "ghtable.h"
 
+typedef struct ghtable
+{
+    size_t count;
+    size_t capacity;
+    ghtable_entry* table;
+    size_t key_list_capacity;
+    key_list_entry* keys;
+
+} ghtable;
+
+typedef struct ghtable_entry
+{
+    void* key;
+    void* value;
+    size_t key_len;
+    size_t value_size;
+    size_t hash;
+
+} ghtable_entry;
+
 static inline key_list_entry* allocate_key_list(size_t capacity)
 {
     key_list_entry* list = malloc(capacity*sizeof(key_list_entry));
@@ -20,6 +40,41 @@ static inline void free_key_list(key_list_entry* list)
         return;
 
     free(list);
+}
+
+size_t ghtable_capacity(ghtable* ght)
+{
+    return ght->capacity;
+}
+
+size_t ghtable_count(ghtable* ght)
+{
+    return ght->count;
+}
+
+size_t ghtable_size(ghtable* ght)
+{
+    return ght->capacity * sizeof( ghtable_entry );
+}
+
+size_t ghtable_shrink_size(ghtable* ght)
+{
+    return (size_t)( (ght->count/LOAD_FACTOR)*sizeof(ghtable_entry) );
+}
+
+size_t ghtable_key_list_size(ghtable* ght)
+{
+    return ght->key_list_capacity * sizeof(key_list_entry);
+}
+
+size_t ghtable_key_list_shrink_size(ghtable* ght)
+{
+    return ght->count * sizeof(key_list_entry);
+}
+
+const key_list_entry* ghtable_key_list(ghtable* ght)
+{
+    return ght->keys;
 }
 
 ghtable* new_ghtable(size_t est_init_count, char type)
@@ -131,6 +186,24 @@ void* ghtable_getn(ghtable* ght, const void* key, size_t key_size)
         return entry->value;
     else
         return NULL;
+}
+
+value_view ghtable_get_view(ghtable* ght, const char* key)
+{
+    ghtable_entry* entry;
+    if ( (entry = ghtable_get_entry(ght, key, strlen(key))) )
+        return (value_view){entry->value, entry->value_size};
+    else
+        return (value_view){0, 0};
+}
+
+value_view ghtable_get_viewn(ghtable* ght, const void* key, size_t key_len)
+{
+    ghtable_entry* entry;
+    if ( (entry = ghtable_get_entry(ght, key, key_len)) )
+        return (value_view){entry->value, entry->value_size};
+    else
+        return (value_view){0, 0};
 }
 
 void* ghtable_get_nth(ghtable* ght, size_t index)
