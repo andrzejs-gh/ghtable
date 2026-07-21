@@ -195,10 +195,10 @@ void delete_keys(ghtable* ght)
     test_random_keys(ght, 5);
 }
 
-void iterate_over_key_list(ghtable* ght)
+void iterate_over_key_list(ghtable* ght, size_t n)
 {
     key_list_entry* keys = ght->keys;
-    for ( size_t i = 0; i < ght->count; i++ )
+    for ( size_t i = 0; i < n; i++ )
     {
         if ( i % 2 == 0 )
             printf("Index: %zu, key: %zu \n", i, *(size_t*)keys[i].key);

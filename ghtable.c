@@ -459,11 +459,11 @@ int ghtable_del(ghtable* ght, const char* key)
         size_t capacity = ght->capacity;
         size_t index = entry - table;
 
-        remove_entry(entry);
-        shift_entries(ght, index);
-
         if ( ght->keys )
             del_key(ght, key, key_len);
+
+        remove_entry(entry);
+        shift_entries(ght, index);
 
         ght->count--;
     }
@@ -482,11 +482,11 @@ int ghtable_deln(ghtable* ght, const void* key, size_t key_len)
         size_t capacity = ght->capacity;
         size_t index = entry - table;
 
-        remove_entry(entry);
-        shift_entries(ght, index);
-
         if ( ght->keys )
             del_key(ght, key, key_len);
+
+        remove_entry(entry);
+        shift_entries(ght, index);
 
         ght->count--;
     }
