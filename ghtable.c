@@ -150,11 +150,10 @@ static inline size_t get_hash(const void* key, size_t n)
     return hash;
 }
 
-ghtable_entry* ghtable_get_entry(ghtable* ght, const void* key, size_t key_size)
+static inline ghtable_entry* get_entry(ghtable* ght, const void* key, size_t key_size)
 {
     size_t ght_capacity = ght->capacity;
-    size_t hash = get_hash(key, key_size);
-    size_t index = hash % ght_capacity;
+    size_t index = get_hash(key, key_size) % ght_capacity;
     ghtable_entry* table = ght->table;
     const void* entry_key;
 
@@ -173,7 +172,7 @@ ghtable_entry* ghtable_get_entry(ghtable* ght, const void* key, size_t key_size)
 void* ghtable_get(ghtable* ght, const char* key)
 {
     ghtable_entry* entry;
-    if ( (entry = ghtable_get_entry(ght, key, strlen(key))) )
+    if ( (entry = get_entry(ght, key, strlen(key))) )
         return entry->value;
     else
         return NULL;
@@ -182,7 +181,7 @@ void* ghtable_get(ghtable* ght, const char* key)
 void* ghtable_getn(ghtable* ght, const void* key, size_t key_size)
 {
     ghtable_entry* entry;
-    if ( (entry = ghtable_get_entry(ght, key, key_size)) )
+    if ( (entry = get_entry(ght, key, key_size)) )
         return entry->value;
     else
         return NULL;
@@ -191,7 +190,7 @@ void* ghtable_getn(ghtable* ght, const void* key, size_t key_size)
 value_view ghtable_get_view(ghtable* ght, const char* key)
 {
     ghtable_entry* entry;
-    if ( (entry = ghtable_get_entry(ght, key, strlen(key))) )
+    if ( (entry = get_entry(ght, key, strlen(key))) )
         return (value_view){entry->value, entry->value_size};
     else
         return (value_view){0, 0};
@@ -200,10 +199,21 @@ value_view ghtable_get_view(ghtable* ght, const char* key)
 value_view ghtable_get_viewn(ghtable* ght, const void* key, size_t key_len)
 {
     ghtable_entry* entry;
-    if ( (entry = ghtable_get_entry(ght, key, key_len)) )
+    if ( (entry = get_entry(ght, key, key_len)) )
         return (value_view){entry->value, entry->value_size};
     else
         return (value_view){0, 0};
+}
+
+const void* ghtable_nth_key(ghtable* ght, size_t index)
+{
+    if ( !ght || !ght->keys || !ght->count )
+        return NULL;
+
+    if ( index > ght->count - 1 )
+        return NULL;
+
+    return ght->keys[index].key;
 }
 
 void* ghtable_get_nth(ghtable* ght, size_t index)
@@ -221,7 +231,7 @@ void* ghtable_get_nth(ghtable* ght, size_t index)
 
 void* ghtable_cv(ghtable* ght, const char* key, void* buffer)
 {
-    ghtable_entry* entry = ghtable_get_entry(ght, key, strlen(key));
+    ghtable_entry* entry = get_entry(ght, key, strlen(key));
 
     size_t value_size = entry->value_size;
     void* value = entry->value;
@@ -524,7 +534,7 @@ static inline void shift_entries(ghtable* ght, size_t index)
 int ghtable_del(ghtable* ght, const char* key)
 {
     size_t key_len = strlen(key);
-    ghtable_entry* entry = ghtable_get_entry(ght, key, key_len);
+    ghtable_entry* entry = get_entry(ght, key, key_len);
 
     if ( entry )
     {
@@ -548,7 +558,7 @@ int ghtable_del(ghtable* ght, const char* key)
 
 int ghtable_deln(ghtable* ght, const void* key, size_t key_len)
 {
-    ghtable_entry* entry = ghtable_get_entry(ght, key, key_len);
+    ghtable_entry* entry = get_entry(ght, key, key_len);
     if ( entry )
     {
         ghtable_entry* table = ght->table;
