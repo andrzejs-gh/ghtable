@@ -39,7 +39,7 @@ void test_random_keys(ghtable* ght, size_t n)
     char key[32];
     size_t i;
     double t;
-    size_t* value_ptr;
+    const size_t* value_ptr;
 
     printf("Testing %zu random keys: \n", n);
 
@@ -76,7 +76,7 @@ void test_random_keys(ghtable* ght, size_t n)
 
 void test_key(ghtable* ght, const void* key, size_t key_len)
 {
-    size_t* value_ptr = ghtable_getn(ght, key, key_len);
+    const size_t* value_ptr = ghtable_getn(ght, key, key_len);
     if ( !value_ptr )
         puts("Invalid key.");
     else
@@ -89,7 +89,7 @@ void test_random_key_indexes(ghtable* ght, size_t n)
     for ( int i = 0; i < n; i++ )
     {
         size_t index = (size_t)(random() % ght_count );
-        size_t* value;
+        const size_t* value;
 
         if ( (value = ghtable_nth(ght, index) ) )
             printf("Key at index %zu returns value %zu \n", index, *value);
