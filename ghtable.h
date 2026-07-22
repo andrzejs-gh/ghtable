@@ -12,14 +12,14 @@
 
 typedef struct
 {
-    void* key;
+    const void* key;
     size_t key_len;
 
 } key_list_entry;
 
 typedef struct
 {
-    void* value;
+    const void* value;
     size_t size;
 
 } value_view;
@@ -42,20 +42,20 @@ size_t ghtable_key_list_shrink_size(ghtable* ght);
 ghtable* ghtable_grow(ghtable* ght, size_t factor);
 ghtable* ghtable_shrink(ghtable* ght);
 
-void* ghtable_get(ghtable* ght, const char* key);
-void* ghtable_getn(ghtable* ght, const void* key, size_t key_size);
+const void* ghtable_get(ghtable* ght, const char* key);
+const void* ghtable_getn(ghtable* ght, const void* key, size_t key_size);
 value_view ghtable_view(ghtable* ght, const char* key);
 value_view ghtable_viewn(ghtable* ght, const void* key, size_t key_len);
 
-void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size);
-void* ghtable_setn(ghtable* ght, const void* key, size_t key_size, void* value, size_t value_size);
+const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size);
+const void* ghtable_setn(ghtable* ght, const void* key, size_t key_size, void* value, size_t value_size);
 
 int ghtable_del(ghtable* ght, const char* key);
 int ghtable_deln(ghtable* ght, const void* key, size_t key_len);
 
-void* ghtable_nth(ghtable* ght, size_t index);
-const key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index);
+const void* ghtable_nth(ghtable* ght, size_t index);
 const void* ghtable_nth_key(ghtable* ght, size_t index);
+key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index);
 
 void ghtable_drop_keylist(ghtable* ght);
 

@@ -169,7 +169,7 @@ static inline ghtable_entry* get_entry(ghtable* ght, const void* key, size_t key
     return NULL;
 }
 
-void* ghtable_get(ghtable* ght, const char* key)
+const void* ghtable_get(ghtable* ght, const char* key)
 {
     ghtable_entry* entry;
     if ( (entry = get_entry(ght, key, strlen(key))) )
@@ -178,7 +178,7 @@ void* ghtable_get(ghtable* ght, const char* key)
         return NULL;
 }
 
-void* ghtable_getn(ghtable* ght, const void* key, size_t key_size)
+const void* ghtable_getn(ghtable* ght, const void* key, size_t key_size)
 {
     ghtable_entry* entry;
     if ( (entry = get_entry(ght, key, key_size)) )
@@ -205,7 +205,7 @@ value_view ghtable_viewn(ghtable* ght, const void* key, size_t key_len)
         return (value_view){0, 0};
 }
 
-const key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index)
+key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index)
 {
     if ( !ght || !ght->keys || !ght->count )
         return (key_list_entry){NULL, 0};
@@ -227,7 +227,7 @@ const void* ghtable_nth_key(ghtable* ght, size_t index)
     return ght->keys[index].key;
 }
 
-void* ghtable_nth(ghtable* ght, size_t index)
+const void* ghtable_nth(ghtable* ght, size_t index)
 {
     if ( !ght->keys || !ght->count )
         return NULL;
@@ -397,7 +397,7 @@ static inline void remove_entry(ghtable_entry* entry)
     *entry = (ghtable_entry){NULL, NULL, 0, 0, 0};
 }
 
-void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
+const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
 {
     // size_t ght_capacity = ght->capacity;
     if ( ght->count > LOAD_FACTOR * ght->capacity )
@@ -462,7 +462,7 @@ void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
     return value_ptr;
 }
 
-void* ghtable_setn(ghtable* ght, const void* key, size_t key_size, void* value, size_t value_size)
+const void* ghtable_setn(ghtable* ght, const void* key, size_t key_size, void* value, size_t value_size)
 {
     if ( ght->count > LOAD_FACTOR * ght->capacity )
     {
