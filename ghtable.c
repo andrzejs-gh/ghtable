@@ -232,12 +232,13 @@ void* ghtable_get_nth(ghtable* ght, size_t index)
 void* ghtable_cv(ghtable* ght, const char* key, void* buffer)
 {
     ghtable_entry* entry = get_entry(ght, key, strlen(key));
+    if ( !entry )
+        return NULL;
 
     size_t value_size = entry->value_size;
     void* value = entry->value;
 
-
-    return NULL;
+    return memcpy(buffer, value, value_size);
 }
 
 static inline void rebuild_table(ghtable_entry* old_table, size_t old_capacity,
