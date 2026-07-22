@@ -91,7 +91,7 @@ void test_random_key_indexes(ghtable* ght, size_t n)
         size_t index = (size_t)(random() % ght_count );
         size_t* value;
 
-        if ( (value = ghtable_get_nth(ght, index) ) )
+        if ( (value = ghtable_nth(ght, index) ) )
             printf("Key at index %zu returns value %zu \n", index, *value);
         else
             printf("[ Error ] Index %zu is invalid. \n", index);

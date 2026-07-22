@@ -187,7 +187,7 @@ void* ghtable_getn(ghtable* ght, const void* key, size_t key_size)
         return NULL;
 }
 
-value_view ghtable_get_view(ghtable* ght, const char* key)
+value_view ghtable_view(ghtable* ght, const char* key)
 {
     ghtable_entry* entry;
     if ( (entry = get_entry(ght, key, strlen(key))) )
@@ -196,13 +196,24 @@ value_view ghtable_get_view(ghtable* ght, const char* key)
         return (value_view){0, 0};
 }
 
-value_view ghtable_get_viewn(ghtable* ght, const void* key, size_t key_len)
+value_view ghtable_viewn(ghtable* ght, const void* key, size_t key_len)
 {
     ghtable_entry* entry;
     if ( (entry = get_entry(ght, key, key_len)) )
         return (value_view){entry->value, entry->value_size};
     else
         return (value_view){0, 0};
+}
+
+const key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index)
+{
+    if ( !ght || !ght->keys || !ght->count )
+        return (key_list_entry){NULL, 0};
+
+    if ( index > ght->count - 1 )
+        return (key_list_entry){NULL, 0};
+
+    return ght->keys[index];
 }
 
 const void* ghtable_nth_key(ghtable* ght, size_t index)
@@ -216,7 +227,7 @@ const void* ghtable_nth_key(ghtable* ght, size_t index)
     return ght->keys[index].key;
 }
 
-void* ghtable_get_nth(ghtable* ght, size_t index)
+void* ghtable_nth(ghtable* ght, size_t index)
 {
     if ( !ght->keys || !ght->count )
         return NULL;
@@ -232,6 +243,18 @@ void* ghtable_get_nth(ghtable* ght, size_t index)
 void* ghtable_cv(ghtable* ght, const char* key, void* buffer)
 {
     ghtable_entry* entry = get_entry(ght, key, strlen(key));
+    if ( !entry )
+        return NULL;
+
+    size_t value_size = entry->value_size;
+    void* value = entry->value;
+
+    return memcpy(buffer, value, value_size);
+}
+
+void* ghtable_cvn(ghtable* ght, const void* key, size_t key_len, void* buffer)
+{
+    ghtable_entry* entry = get_entry(ght, key, key_len);
     if ( !entry )
         return NULL;
 
