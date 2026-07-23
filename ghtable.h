@@ -10,6 +10,12 @@
 #define ORD 'o'
 #define UNORD 'u'
 
+enum ghtable_del_err
+{
+    TABLE_OR_KEY_NULL = 1,
+    ENTRY_NOT_FOUND
+};
+
 typedef struct
 {
     const void* key;

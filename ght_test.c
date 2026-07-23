@@ -103,8 +103,8 @@ void shrink_table(ghtable* ght)
     printf( "Table size in memory: %zu \n", ghtable_size(ght) );
     printf( "Key list size in memory: %zu \n", ghtable_key_list_size(ght) );
 
-    size_t table_after_shrink = ghtable_shrink_size(ght);
-    size_t kl_after_shrink = ghtable_key_list_shrink_size(ght);
+    size_t table_after_shrink = ghtable_opt_size(ght);
+    size_t kl_after_shrink = ghtable_key_list_opt_size(ght);
 
     if (!ghtable_shrink(ght))
     {
