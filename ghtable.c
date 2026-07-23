@@ -44,31 +44,49 @@ static inline void free_key_list(key_list_entry* list)
 
 size_t ghtable_capacity(ghtable* ght)
 {
+    if ( !ght )
+        return 0;
+
     return ght->capacity;
 }
 
 size_t ghtable_count(ghtable* ght)
 {
+    if ( !ght )
+        return 0;
+
     return ght->count;
 }
 
 size_t ghtable_size(ghtable* ght)
 {
+    if ( !ght )
+        return 0;
+
     return ght->capacity * sizeof( ghtable_entry );
 }
 
-size_t ghtable_shrink_size(ghtable* ght)
+size_t ghtable_opt_size(ghtable* ght)
 {
+    if ( !ght )
+        return 0;
+
     return (size_t)( (ght->count/LOAD_FACTOR)*sizeof(ghtable_entry) );
 }
 
 size_t ghtable_key_list_size(ghtable* ght)
 {
+    if ( !ght )
+        return 0;
+
     return ght->key_list_capacity * sizeof(key_list_entry);
 }
 
-size_t ghtable_key_list_shrink_size(ghtable* ght)
+size_t ghtable_key_list_opt_size(ghtable* ght)
 {
+    if ( !ght )
+        return 0;
+
     return ght->count * sizeof(key_list_entry);
 }
 

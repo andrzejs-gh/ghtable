@@ -35,9 +35,9 @@ size_t ghtable_capacity(ghtable* ght);
 size_t ghtable_count(ghtable* ght);
 
 size_t ghtable_size(ghtable* ght);
-size_t ghtable_shrink_size(ghtable* ght);
+size_t ghtable_opt_size(ghtable* ght);
 size_t ghtable_key_list_size(ghtable* ght);
-size_t ghtable_key_list_shrink_size(ghtable* ght);
+size_t ghtable_key_list_opt_size(ghtable* ght);
 
 ghtable* ghtable_grow(ghtable* ght, size_t factor);
 ghtable* ghtable_shrink(ghtable* ght);
