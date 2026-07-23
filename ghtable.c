@@ -399,8 +399,7 @@ static inline void remove_entry(ghtable_entry* entry)
 
 const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
 {
-    // size_t ght_capacity = ght->capacity;
-    if ( ght->count > LOAD_FACTOR * ght->capacity )
+    if ( ght->count + 1 > LOAD_FACTOR * ght->capacity )
     {
         if ( !ghtable_grow(ght, 2) )
             return NULL;
@@ -471,7 +470,7 @@ const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
 
 const void* ghtable_setn(ghtable* ght, const void* key, size_t key_size, void* value, size_t value_size)
 {
-    if ( ght->count > LOAD_FACTOR * ght->capacity )
+    if ( ght->count + 1 > LOAD_FACTOR * ght->capacity )
     {
         if ( !ghtable_grow(ght, 2) )
             return NULL;
