@@ -646,7 +646,7 @@ int ghtable_del(ghtable* ght, const char* key)
 
 int ghtable_deln(ghtable* ght, const void* key, size_t key_len)
 {
-    if ( !ght || !key || key_len )
+    if ( !ght || !key || !key_len )
         return TABLE_OR_KEY_NULL;
 
     ghtable_entry* entry = get_entry(ght, key, key_len);

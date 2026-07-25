@@ -9,7 +9,8 @@
 #include "ghtable.h"
 #include "time_exec.h"
 
-#define GHT_COUNT 1000000
+#define LIMIT 1000000
+
 #define RED(x) "\033[31m" x "\033[0m"
 #define GREEN(x) "\033[32m" x "\033[0m"
 
@@ -26,45 +27,52 @@ typedef struct
 char key[32];
 size_t bkey;
 size_t value;
-size_t deleted[GHT_COUNT / 2];
+
+size_t count = 0;
+bool global_check_list[LIMIT] = {false};
+
+static inline bool is_entry_valid(const char* str_key, size_t value)
+{
+    size_t val_from_key = (size_t)( strtoull(&str_key[4], NULL, 10) );
+    if ( val_from_key != value )
+        return false;
+
+    return true;
+}
+
+static inline void count_ver_and_inc(ghtable* ght, size_t key_number)
+{
+    if ( ghtable_count(ght) != count )
+    {
+        puts(ERROR " Table holds incorect count!");
+        assert(false);
+    }
+
+    if ( !global_check_list[key_number] )
+        count++;
+}
+
+static inline void count_ver_and_dec(ghtable* ght, size_t key_number)
+{
+    if ( ghtable_count(ght) != count )
+    {
+        puts(ERROR " Table holds incorect count!");
+        assert(false);
+    }
+
+    if ( global_check_list[key_number] )
+        count--;
+}
 
 static inline size_t random_from_range(range r)
 {
     return r.min + random() % (r.max - r.min);
 }
 
-void insert_elements(ghtable* ght, size_t n)
+static inline char* get_rand_pair(char* key, size_t* value)
 {
-    bool is_even = true;
-    char buffer[32];
-
-    for ( size_t i = 0; i < n; i++ )
-    {
-        if ( is_even )
-        {
-            sprintf(buffer, "key %zu", i);
-            if ( !ghtable_set(ght, buffer, &i, sizeof i) )
-            {
-                printf(ERROR " Failed insertion at %zu\n", i);
-                assert(false);
-            }
-            is_even = false;
-        }
-        else
-        {
-            if ( !ghtable_setn(ght, &i, sizeof i, &i, sizeof i) )
-            {
-                printf(ERROR " Failed insertion at %zu\n", i);
-                assert(false);
-            }
-            is_even = true;
-        }
-    }
-}
-
-static inline char* get_rand_pair(char* key, size_t* value, range r)
-{
-    size_t key_number = random_from_range(r);
+    // size_t key_number = random_from_range(r);
+    size_t key_number = random() % LIMIT;
     if ( key_number % 2 != 0 )
         key_number--;
 
@@ -77,9 +85,10 @@ static inline char* get_rand_pair(char* key, size_t* value, range r)
         return NULL;
 }
 
-static inline size_t* get_rand_pairn(size_t* key, size_t* value, range r)
+static inline size_t* get_rand_pairn(size_t* key, size_t* value)
 {
-    size_t key_number = random_from_range(r);
+    // size_t key_number = random_from_range(r);
+    size_t key_number = random() % LIMIT;
     if ( key_number % 2 == 0 )
     {
         if ( key_number == 0 )
@@ -94,14 +103,15 @@ static inline size_t* get_rand_pairn(size_t* key, size_t* value, range r)
     return key;
 }
 
-void set_random(ghtable* ght, range r)
+void set_random(ghtable* ght)
 {
     const void* ret;
     double t;
 
     if ( random() % 2 == 0 )
     {
-        get_rand_pair(key, &value, r);
+        get_rand_pair(key, &value);
+        count_ver_and_inc(ght, value);
 
         TIME_STORE( t,
                     ret = ghtable_set(ght, key, &value, sizeof value);
@@ -116,10 +126,11 @@ void set_random(ghtable* ght, range r)
     }
     else
     {
-        get_rand_pairn(&bkey, &value, r);
+        get_rand_pairn(&bkey, &value);
+        count_ver_and_inc(ght, value);
 
         TIME_STORE( t,
-                    ret = ghtable_setn(ght, key, sizeof bkey, &value, sizeof value);
+                    ret = ghtable_setn(ght, &bkey, sizeof bkey, &value, sizeof value);
         );
         if ( ret )
             printf(OK " Set: %zu : %zu in t = %.9f s \n", bkey, value, t);
@@ -129,16 +140,17 @@ void set_random(ghtable* ght, range r)
             assert(false);
         }
     }
+    global_check_list[value] = true;
 }
 
-void get_random(ghtable* ght, range r)
+void get_random(ghtable* ght)
 {
     const size_t* value_ptr;
     double t;
 
     if ( random() % 2 == 0 )
     {
-        get_rand_pair(key, &value, r);
+        get_rand_pair(key, &value);
 
         TIME_STORE( t,
                     value_ptr = ghtable_get(ght, key);
@@ -155,7 +167,7 @@ void get_random(ghtable* ght, range r)
                 assert(false);
             }
         }
-        else
+        else if ( global_check_list[value] )
         {
             printf(ERROR " Failed to retrieve \"%s\" \n", key);
             assert(false);
@@ -163,7 +175,7 @@ void get_random(ghtable* ght, range r)
     }
     else
     {
-        get_rand_pairn(&bkey, &value, r);
+        get_rand_pairn(&bkey, &value);
 
         TIME_STORE( t,
                     value_ptr = ghtable_getn(ght, &bkey, sizeof bkey);
@@ -180,7 +192,7 @@ void get_random(ghtable* ght, range r)
                 assert(false);
             }
         }
-        else
+        else if ( global_check_list[value] )
         {
             printf(ERROR " Failed to retrieve %zu : %zu \n", bkey, value);
             assert(false);
@@ -188,27 +200,111 @@ void get_random(ghtable* ght, range r)
     }
 }
 
-void del_random(ghtable* ght, range r)
+void del_random(ghtable* ght)
 {
+    int ret;
+    double t;
 
+    if ( random() % 2 == 0 )
+    {
+        get_rand_pair(key, &value);
+        count_ver_and_dec(ght, value);
+
+        TIME_STORE( t,
+                    ret = ghtable_del(ght, key);
+        );
+        if ( !ret )
+            printf(OK " Deleted: \"%s\" : %zu in t = %.9f s \n", key, value, t);
+        else if ( global_check_list[value] )
+        {
+            printf(ERROR " Failed to delete \"%s\" : %zu \n", key, value);
+            ret == ENTRY_NOT_FOUND ? puts(ERROR " ENTRY_NOT_FOUND") : puts(ERROR " TABLE_OR_KEY_NULL");
+            assert(false);
+        }
+    }
+    else
+    {
+        get_rand_pairn(&bkey, &value);
+        count_ver_and_dec(ght, value);
+
+        TIME_STORE( t,
+                    ret = ghtable_deln(ght, &bkey, sizeof bkey);
+        );
+        if ( !ret )
+            printf(OK " Deleted: %zu : %zu in t = %.9f s \n", bkey, value, t);
+        else if ( global_check_list[value] )
+        {
+            printf(ERROR " Failed to delete %zu : %zu \n", bkey, value);
+            ret == ENTRY_NOT_FOUND ? puts(ERROR " ENTRY_NOT_FOUND") : puts(ERROR " TABLE_OR_KEY_NULL");
+            assert(false);
+        }
+    }
+    global_check_list[value] = false;
 }
 
-void random_nth(ghtable* ght, range r)
+void random_nth(ghtable* ght)
 {
+    size_t ght_count = ghtable_count(ght);
+    if ( !ght_count ) return;
 
+    size_t n = random() % ght_count;
+    key_list_entry kl_entry = ghtable_nth_kl_entry(ght, n);
+    if ( !kl_entry.key )
+    {
+        printf(ERROR " Key number %zu not found on the key list! \n", n);
+        assert(false);
+    }
+
+    const size_t* val = ghtable_nth(ght, n);
+    if ( !val )
+    {
+        printf(ERROR " Key number %zu not found in the table! \n", n);
+        assert(false);
+    }
+    else if ( *val % 2 == 0 )
+    {
+        if ( !is_entry_valid(kl_entry.key, *val) )
+        {
+            printf(ERROR " Invalid entry: \"%s\" : " RED("%zu") "\n",
+                                            (char*)kl_entry.key, *val);
+            assert(false);
+        }
+    }
+    else
+    {
+        if ( *(size_t*)kl_entry.key != *val )
+        {
+            printf(ERROR " Invalid entry: %zu : " RED("%zu") "\n",
+                   *(size_t*)kl_entry.key, *val);
+            assert(false);
+        }
+    }
+
+    printf(OK " Entry number %zu verified \n", n);
+}
+
+void fuzzy_test(ghtable* ght)
+{
+    for ( size_t i = 0; i < LIMIT; i++ )
+    {
+        size_t r = random_from_range((range){0, 5});
+        switch ( r )
+        {
+            case 0: set_random(ght); break;
+            case 1: get_random(ght); break;
+            case 2: del_random(ght); break;
+            case 3: random_nth(ght); break;
+            case 4: break;
+        }
+    }
 }
 
 int main(void)
 {
     srandom((unsigned)time(NULL));
 
-    size_t initial_count = GHT_COUNT / 2;
-
     ghtable* ght = new_ghtable(1, ORD);
-    insert_elements(ght, initial_count);
-
-    for ( int i = 0; i < 100; i++ )
-        get_random(ght, (range){0, GHT_COUNT});
+    fuzzy_test(ght);
 
     return 0;
 }
