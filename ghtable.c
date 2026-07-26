@@ -602,14 +602,17 @@ static inline void shift_entries(ghtable* ght, size_t index)
     {
         expected_index = table[index].hash % capacity;
 
-        if ( index == expected_index )
-            break;
-        else if ( index == 0 )
-            table[capacity - 1] = table[index];
-        else
-            table[index-1] = table[index];
+        while ( expected_index != index )
+        {
+            if ( !table[expected_index].key )
+            {
+                table[expected_index] = table[index];
+                table[index] = (ghtable_entry){NULL, NULL, 0, 0, 0};
+            }
 
-        table[index] = (ghtable_entry){NULL, NULL, 0, 0, 0};
+            if ( ++expected_index == capacity )
+                expected_index = 0;
+        }
 
         if ( ++index == capacity )
             index = 0;
