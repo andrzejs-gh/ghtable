@@ -17,6 +17,9 @@
 #define OK "[ " GREEN("OK") " ]"
 #define ERROR "[ " RED("ERROR") " ]"
 
+size_t count_holes_in_kl(ghtable* ght);
+void count_holes_in_table(ghtable* ght);
+
 typedef struct
 {
     size_t min;
@@ -96,7 +99,7 @@ void get_random(ghtable* ght)
     const size_t* value_ptr;
     double t;
 
-    size_t key_number;
+    size_t key_number = random() % LIMIT;
     sprintf(key, "key %zu", key_number);
 
     TIME_STORE( t,
@@ -122,13 +125,31 @@ void get_random(ghtable* ght)
 
 }
 
+size_t get_ord_index(ghtable* ght, const char* key)
+{
+    const key_list_entry* keys = ghtable_key_list(ght);
+    size_t ght_count = ghtable_count(ght);
+    size_t key_len = strlen(key);
+
+    for ( size_t i = 0; i < ght_count; i++ )
+    {
+        if ( !memcmp(key, keys[i].key, key_len) )
+            return i;
+    }
+
+    return LIMIT+1;
+}
+
 void del_random(ghtable* ght)
 {
     int ret;
     double t;
 
-    size_t key_number;
+    size_t key_number = random() % LIMIT;
     sprintf(key, "key %zu", key_number);
+    //
+    size_t ord_index = get_ord_index(ght, key);
+    //
 
     TIME_STORE( t,
                 ret = ghtable_del(ght, key);
@@ -137,6 +158,13 @@ void del_random(ghtable* ght)
     {
         printf(OK " Deleted: \"%s\" : %zu in t = %.9f s \n", key, key_number, t);
         deletion_count++;
+        //
+        size_t holes = count_holes_in_kl(ght);
+        printf("... and the ord index of deleted entry... %zu \n", ord_index);
+        printf("ght count = %zu \n", ghtable_count(ght));
+        if ( holes )
+            assert(false);
+        //
     }
     else if ( global_check_list[key_number] )
     {
@@ -148,11 +176,14 @@ void del_random(ghtable* ght)
     global_check_list[key_number] = false;
 }
 
+
 void random_nth(ghtable* ght)
 {
     if ( !ghtable_count(ght) ) return;
+
     size_t n = random() % ghtable_count(ght);
     key_list_entry kl_entry = ghtable_nth_kl_entry(ght, n);
+
     if ( !kl_entry.key )
     {
         printf(ERROR " Key number %zu not found on the key list! \n", n);
@@ -163,9 +194,13 @@ void random_nth(ghtable* ght)
     if ( !val )
     {
         printf(ERROR " Key number %zu not found in the table! \n", n);
+        //
+        count_holes_in_kl(ght);
+        count_holes_in_table(ght);
+        //
         assert(false);
     }
-    else if ( !is_entry_valid(key, *val) )
+    else if ( !is_entry_valid(kl_entry.key, *val) )
     {
         printf(ERROR " Invalid entry: \"%s\" : " RED("%zu") "\n",
                (char*)kl_entry.key, *val);
@@ -182,7 +217,7 @@ void shrink_table(ghtable* ght)
     bool failure = false;
 
     void* ret = ghtable_shrink(ght);
-    if ( !ret )
+    if ( !ret && ghtable_count(ght) )
     {
         puts(ERROR " ghtable_shrink failure. Could be realloc failure.");
         assert(false);
@@ -209,26 +244,81 @@ void shrink_table(ghtable* ght)
         puts(OK " Table shrunk correctly.");
 }
 
-void fuzzy_test(ghtable* ght)
+void count_holes_in_table(ghtable* ght)
 {
-    range func_range = (range){0, 5};
+    const size_t* ret;
+    size_t count = 0;
 
     for ( size_t i = 0; i < LIMIT; i++ )
     {
-        size_t r = random_from_range(func_range);
-        switch ( r )
+        if ( global_check_list[i] )
         {
-            case 0: shrink_table(ght); break;
-            case 1: get_random(ght); break;
-            case 2: del_random(ght); break;
-            case 3: random_nth(ght); break;
-            case 4: break;
+            sprintf(key, "key %zu", i);
+            ret = ghtable_get(ght, key);
+            if ( !ret )
+                printf(ERROR " %s unreachable", key);
+
+            count++;
         }
-        set_random(ght);
+    }
+
+    if ( count != ghtable_count(ght) )
+        puts(ERROR " Counts missmatch!");
+    else
+        puts("Count match.");
+}
+
+size_t count_holes_in_kl(ghtable* ght)
+{
+    const key_list_entry* kl = ghtable_key_list(ght);
+    size_t ght_count = ghtable_count(ght);
+    size_t holes = 0;
+
+    for ( int i = 0; i < ght_count; i++ )
+    {
+        const char* key = kl[i].key;
+        if ( key[0] != 'k')
+        {
+            printf(RED("x") " dziura at %d \n", i);
+            holes++;
+        }
+    }
+
+    return holes;
+}
+
+void fill_half_the_table(ghtable* ght)
+{
+    for ( size_t i = 0; i < LIMIT/2; i++ )
+    {
+        size_t key_number = random() % LIMIT;
+        sprintf(key, "key %zu", key_number);
+        ghtable_set(ght, key, &key_number, sizeof key_number);
     }
 }
 
+void fuzzy_test(ghtable* ght)
+{
+    range func_range = (range){0, 3};
 
+    for ( size_t i = 0; i < LIMIT; i++ )
+    {
+        // printf("%zu \n", i);
+        size_t r = random_from_range(func_range);
+        switch ( r )
+        {
+            case 0: get_random(ght); break;
+            case 1: del_random(ght); break;
+            case 2: random_nth(ght); break;
+        }
+        set_random(ght);
+        if ( i % 1000 == 0 )
+        {
+            printf("i = %zu \n", i);
+            //shrink_table(ght);
+        }
+    }
+}
 
 int main(void)
 {
