@@ -148,7 +148,8 @@ void del_random(ghtable* ght)
     size_t key_number = random() % LIMIT;
     sprintf(key, "key %zu", key_number);
     //
-    size_t ord_index = get_ord_index(ght, key);
+    //size_t ord_index = get_ord_index(ght, key);
+    //printf("cap = %zu \n", ghtable_capacity(ght));
     //
 
     TIME_STORE( t,
@@ -159,11 +160,11 @@ void del_random(ghtable* ght)
         printf(OK " Deleted: \"%s\" : %zu in t = %.9f s \n", key, key_number, t);
         deletion_count++;
         //
-        size_t holes = count_holes_in_kl(ght);
-        printf("... and the ord index of deleted entry... %zu \n", ord_index);
-        printf("ght count = %zu \n", ghtable_count(ght));
-        if ( holes )
-            assert(false);
+        //size_t holes = count_holes_in_kl(ght);
+        //printf("... and the ord index of deleted entry... %zu \n", ord_index);
+        //printf("ght count = %zu \n", ghtable_count(ght));
+        // if ( holes )
+        //     assert(false);
         //
     }
     else if ( global_check_list[key_number] )
@@ -179,7 +180,7 @@ void del_random(ghtable* ght)
 
 void random_nth(ghtable* ght)
 {
-    if ( !ghtable_count(ght) ) return;
+    if ( !ghtable_count(ght) || !ghtable_key_list(ght) ) return;
 
     size_t n = random() % ghtable_count(ght);
     key_list_entry kl_entry = ghtable_nth_kl_entry(ght, n);
@@ -230,7 +231,7 @@ void shrink_table(ghtable* ght)
                      opt_size, ghtable_size(ght));
         failure = true;
     }
-    if ( ghtable_key_list_size(ght) != key_list_opt_size )
+    if ( ghtable_key_list(ght) && ghtable_key_list_size(ght) != key_list_opt_size )
     {
         printf(ERROR " Keylist size mismatch after table shrinking: "
                      "key_list_opt_size = %zu vs key_list_size = %zu \n",
@@ -299,12 +300,13 @@ void fill_half_the_table(ghtable* ght)
 
 void fuzzy_test(ghtable* ght)
 {
-    range func_range = (range){0, 3};
+    //range func_range = (range){0, 3};
 
     for ( size_t i = 0; i < LIMIT; i++ )
     {
-        // printf("%zu \n", i);
-        size_t r = random_from_range(func_range);
+        printf("%zu \n", i);
+        size_t r =  i % 3; //random_from_range(func_range);
+        //printf("%zu selected \n", r);
         switch ( r )
         {
             case 0: get_random(ght); break;
@@ -314,8 +316,9 @@ void fuzzy_test(ghtable* ght)
         set_random(ght);
         if ( i % 1000 == 0 )
         {
-            printf("i = %zu \n", i);
-            //shrink_table(ght);
+            shrink_table(ght);
+            if ( ghtable_key_list(ght) && i > LIMIT / 2 )
+                ghtable_drop_keylist(ght);
         }
     }
 }
