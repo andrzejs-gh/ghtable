@@ -613,10 +613,9 @@ static inline void shift_entries(ghtable* ght, size_t index)
     ++index == capacity ? index = 0 : index;
 
     ghtable_entry* table = ght->table;
-    const char* entry_key;
     size_t expected_index;
 
-    while ( (entry_key = table[index].key) )
+    while ( table[index].key )
     {
         expected_index = table[index].hash % capacity;
 
