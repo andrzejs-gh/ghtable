@@ -3,8 +3,6 @@
 
 #include <stddef.h>
 
-#define P 31
-#define M 1000000007
 #define LOAD_FACTOR 0.5
 
 #define ORD 'o'

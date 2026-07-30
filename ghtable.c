@@ -2,8 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "ghtable.h"
+
+#define FNV_OFFSET_BASIS 0xcbf29ce484222325
+#define FNV_PRIME 0x100000001b3
 
 #define MINIMAL_CAPACITY 2
 #define MINIMAL_SIZE MINIMAL_CAPACITY*sizeof(ghtable_entry)
@@ -24,7 +28,7 @@ typedef struct ghtable_entry
     void* value;
     size_t key_len;
     size_t value_size;
-    size_t hash;
+    uint64_t hash;
 
 } ghtable_entry;
 
@@ -170,13 +174,16 @@ void free_ghtable(ghtable* ght)
     free(ght);
 }
 
-static inline size_t get_hash(const void* key, size_t n)
+static inline uint64_t get_hash(const void* key, size_t n)
 {
-    size_t hash = 0;
     const unsigned char* key_ptr = (const unsigned char*)key;
+    uint64_t hash = FNV_OFFSET_BASIS;
 
     for ( size_t i = 0; i < n; i++ )
-        hash = (hash*P + key_ptr[i]) % M;
+    {
+        hash ^= key_ptr[i];
+        hash *= FNV_PRIME;
+    }
 
     return hash;
 }
@@ -470,7 +477,7 @@ const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
     size_t ght_capacity = ght->capacity;
 
     size_t key_len = strlen(key);
-    size_t hash = get_hash(key, key_len);
+    uint64_t hash = get_hash(key, key_len);
     size_t index = hash % ght_capacity;
     ghtable_entry* table = ght->table;
     char* entry_key;
@@ -543,7 +550,7 @@ const void* ghtable_setn(ghtable* ght, const void* key, size_t key_size, void* v
     }
     size_t ght_capacity = ght->capacity;
 
-    size_t hash = get_hash(key, key_size);
+    uint64_t hash = get_hash(key, key_size);
     size_t index = hash % ght_capacity;
     ghtable_entry* table = ght->table;
     void* entry_key;
