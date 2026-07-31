@@ -290,6 +290,42 @@ const void* ghtable_nth(ghtable* ght, size_t index)
     return ghtable_getn(ght, kl_entry.key, kl_entry.key_len);
 }
 
+static inline size_t get_key_index(ghtable* ght, const void* key, size_t key_len)
+{
+    key_list_entry* kl_entry = ght->keys;
+    size_t ght_count = ght->count;
+
+    for ( size_t i = 0; i< ght_count; i++ )
+    {
+        if ( kl_entry[i].key_len == key_len && !memcmp(key, kl_entry[i].key, key_len) )
+            return i;
+    }
+
+    return SIZE_MAX;
+}
+
+size_t ghtable_index(ghtable* ght, const char* key)
+{
+    if ( !ght || !key )
+        return SIZE_MAX;
+
+    if ( !ght->keys )
+        return SIZE_MAX;
+
+    return get_key_index(ght, key, strlen(key));
+}
+
+size_t ghtable_indexn(ghtable* ght, const void* key, size_t key_len)
+{
+    if ( !ght || !key )
+        return SIZE_MAX;
+
+    if ( !ght->keys )
+        return SIZE_MAX;
+
+    return get_key_index(ght, key, key_len);
+}
+
 void* ghtable_cv(ghtable* ght, const char* key, void* buffer)
 {
     if ( !ght || !key || !buffer )

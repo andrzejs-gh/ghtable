@@ -60,6 +60,8 @@ int ghtable_deln(ghtable* ght, const void* key, size_t key_len);
 const void* ghtable_nth(ghtable* ght, size_t index);
 const void* ghtable_nth_key(ghtable* ght, size_t index);
 key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index);
+size_t ghtable_index(ghtable* ght, const char* key);
+size_t ghtable_indexn(ghtable* ght, const void* key, size_t key_len);
 
 void ghtable_drop_keylist(ghtable* ght);
 
