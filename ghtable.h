@@ -33,6 +33,7 @@ typedef struct ghtable_entry ghtable_entry;
 
 ghtable* new_ghtable(size_t est_init_count, char type);
 void free_ghtable(ghtable* ght);
+
 const key_list_entry* ghtable_key_list(ghtable* ght);
 
 size_t ghtable_capacity(ghtable* ght);

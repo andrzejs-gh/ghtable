@@ -505,6 +505,10 @@ const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
     if ( !ght || !key || !value || !size )
         return NULL;
 
+    size_t key_len = strlen(key);
+    if ( !key_len )
+        return NULL;
+
     if ( ght->count + 1 > LOAD_FACTOR * ght->capacity )
     {
         if ( !ghtable_grow(ght, 2) )
@@ -512,7 +516,6 @@ const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size)
     }
     size_t ght_capacity = ght->capacity;
 
-    size_t key_len = strlen(key);
     uint64_t hash = get_hash(key, key_len);
     size_t index = hash % ght_capacity;
     ghtable_entry* table = ght->table;
