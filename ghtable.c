@@ -292,6 +292,9 @@ const void* ghtable_nth(ghtable* ght, size_t index)
 
 static inline size_t get_key_index(ghtable* ght, const void* key, size_t key_len)
 {
+    if ( !key_len )
+        return SIZE_MAX;
+
     key_list_entry* kl_entry = ght->keys;
     size_t ght_count = ght->count;
 
