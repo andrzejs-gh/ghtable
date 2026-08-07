@@ -17,6 +17,7 @@ General overview:
 - arbitrary keys
 - arbitrary data
 - open addressing with linear probing
+- no tombstones, entries are always shifted to fill the gaps
 - hashing via **FNV-1a**
 - `LOAD_FACTOR` tweakable in the `ghtable.h`
 - dynamicaly growing 
@@ -44,7 +45,7 @@ some_t val = {-22, 44};
 
 /* example table:
     *
-    [ 0th entry] "k*ey0" : 33,
+    [0th entry] "key0" : 33,
     [1st entry] "key1" : 0.1234,
     [2nd entry] val : 33,
     [3rd entry] 44 : val
