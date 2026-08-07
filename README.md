@@ -315,7 +315,7 @@ typedef struct
 
 } key_list_entry;
 ```
-The function returns pointer to it.
+The function returns pointer `key_list_entry*` to the first entry.
 If `ghtable` is unordered, the function returns `NULL`.
 
 ### Arguments:
