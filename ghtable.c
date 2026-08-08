@@ -12,6 +12,9 @@
 #define MINIMAL_CAPACITY 2
 #define MINIMAL_SIZE MINIMAL_CAPACITY*sizeof(ghtable_entry)
 
+#define NEXT 'n'
+#define PREV 'p'
+
 typedef struct ghtable
 {
     size_t count;
@@ -31,6 +34,154 @@ typedef struct ghtable_entry
     uint64_t hash;
 
 } ghtable_entry;
+
+ghtable_iterator ghtable_new_iterator(ghtable* ght)
+{
+    if ( !ght || !ght->count )
+        return (ghtable_iterator){NULL, NULL};
+
+    ghtable_entry* first_entry = ght->table;
+    while ( !first_entry->key )
+        first_entry++;
+
+    return (ghtable_iterator){ght, first_entry};
+}
+
+static inline void iterator_move(ghtable_iterator* iterator, char direction)
+{
+    if ( !iterator->entry )
+        return;
+
+    ghtable_entry* table = iterator->ght->table;
+    size_t abs_index = iterator->entry - table;
+    size_t ght_capacity = iterator->ght->capacity;
+
+    if ( direction == NEXT )
+    {
+        while ( abs_index < ght_capacity )
+        {
+            if ( table[++abs_index].key )
+            {
+                iterator->entry = table + abs_index;
+                return;
+            }
+        }
+    }
+    else
+    {
+        while ( abs_index > 0 )
+        {
+            if ( table[--abs_index].key )
+            {
+                iterator->entry = table + abs_index;
+                return;
+            }
+        }
+    }
+
+    iterator->entry = NULL;
+    return;
+}
+
+size_t ghtable_iterator_position(ghtable_iterator* it)
+{
+    if ( !it || !it->entry )
+        return SIZE_MAX;
+
+    const ghtable_entry* start = it->ght->table;
+    const ghtable_entry* entry = it->entry;
+    size_t pos = 0;
+    // [ 0, 0, H, 1, 0, 1, 1 ]
+    while ( start != entry )
+    {
+        if ( start->key )
+            pos++;
+
+        start++;
+    }
+
+    return pos;
+}
+
+ghtable_iterator* ghtable_iterator_seek(ghtable_iterator* it, size_t position)
+{
+    if ( !it || !it->entry )
+        return NULL;
+
+    if ( position >= it->ght->capacity )
+        return NULL;
+
+    size_t current_position = ghtable_iterator_position(it);
+    if ( current_position == position )
+        return it;
+
+    ghtable_entry* table = it->ght->table;
+    size_t abs_index = it->entry - table;
+
+    if ( current_position < position )
+    {
+        while ( current_position < position )
+        {
+            if ( table[++abs_index].key )
+                current_position++;
+        }
+    }
+    else
+    {
+        while ( current_position > position )
+        {
+            if ( table[--abs_index].key )
+                current_position--;
+        }
+    }
+    it->entry = table + abs_index;
+
+    return it;
+}
+
+const void* ghtable_next(ghtable_iterator* it)
+{
+    if ( !it || !it->entry )
+        return NULL;
+
+    const void* value_ptr = it->entry->value;
+    iterator_move(it, NEXT);
+
+    return value_ptr;
+}
+
+const void* ghtable_prev(ghtable_iterator* it)
+{
+    if ( !it || !it->entry )
+        return NULL;
+
+    const void* value_ptr = it->entry->value;
+    iterator_move(it, PREV);
+
+    return value_ptr;
+}
+
+const void* ghtable_next_key(ghtable_iterator* it)
+{
+    if ( !it || !it->entry )
+        return NULL;
+
+    const void* value_ptr = it->entry->key;
+    iterator_move(it, NEXT);
+
+    return value_ptr;
+}
+
+const void* ghtable_prev_key(ghtable_iterator* it)
+{
+    if ( !it || !it->entry )
+        return NULL;
+
+    const void* value_ptr = it->entry->key;
+    iterator_move(it, PREV);
+
+    return value_ptr;
+}
 
 static inline key_list_entry* allocate_key_list(size_t capacity)
 {
