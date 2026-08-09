@@ -38,6 +38,8 @@ typedef struct
 
 } ghtable_iterator;
 
+typedef size_t ghtable_cursor;
+
 ghtable* new_ghtable(size_t est_init_count, char type);
 void free_ghtable(ghtable* ght);
 

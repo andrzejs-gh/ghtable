@@ -47,6 +47,20 @@ ghtable_iterator ghtable_new_iterator(ghtable* ght)
     return (ghtable_iterator){ght, first_entry};
 }
 
+ghtable_cursor ghtable_new_cursor(ghtable* ght)
+{
+    if ( !ght || !ght->count )
+        return SIZE_MAX;
+
+    ghtable_cursor cursor = 0;
+    ghtable_entry* first_entry = ght->table;
+
+    while ( !(first_entry++)->key )
+        cursor++;
+
+    return cursor;
+}
+
 static inline void iterator_move(ghtable_iterator* iterator, char direction)
 {
     if ( !iterator->entry )
@@ -83,6 +97,43 @@ static inline void iterator_move(ghtable_iterator* iterator, char direction)
     return;
 }
 
+static inline void move_cursor(ghtable* ght, ghtable_cursor* cursor, char direction)
+{
+    ghtable_cursor cursor_value = *cursor;
+
+    if ( cursor_value == SIZE_MAX )
+        return;
+
+    size_t ght_capacity = ght->capacity;
+    ghtable_entry* table = ght->table;
+
+    if ( direction == NEXT )
+    {
+        while ( ++cursor_value < ght_capacity )
+        {
+            if ( table[cursor_value].key )
+            {
+                *cursor = cursor_value;
+                return;
+            }
+        }
+    }
+    else
+    {
+        while ( cursor_value > 0 )
+        {
+            if ( table[--cursor_value].key )
+            {
+                *cursor = cursor_value;
+                return;
+            }
+        }
+    }
+
+    *cursor = SIZE_MAX;
+    return;
+}
+
 size_t ghtable_iterator_position(ghtable_iterator* it)
 {
     if ( !it || !it->entry )
@@ -101,6 +152,20 @@ size_t ghtable_iterator_position(ghtable_iterator* it)
     }
 
     return pos;
+}
+
+size_t ghtable_cursor_position(ghtable* ght, ghtable_cursor* cursor)
+{
+    if ( !ght || !cursor )
+        return SIZE_MAX;
+
+    ghtable_cursor curor_value = *cursor;
+    if ( curor_value == SIZE_MAX )
+        return SIZE_MAX;
+
+    /////////////////
+    return SIZE_MAX;
+
 }
 
 ghtable_iterator* ghtable_iterator_seek(ghtable_iterator* it, size_t position)
