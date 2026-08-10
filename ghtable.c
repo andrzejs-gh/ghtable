@@ -35,22 +35,10 @@ typedef struct ghtable_entry
 
 } ghtable_entry;
 
-ghtable_iterator ghtable_new_iterator(ghtable* ght)
-{
-    if ( !ght || !ght->count )
-        return (ghtable_iterator){NULL, NULL};
-
-    ghtable_entry* first_entry = ght->table;
-    while ( !first_entry->key )
-        first_entry++;
-
-    return (ghtable_iterator){ght, first_entry};
-}
-
 ghtable_cursor ghtable_new_cursor(ghtable* ght)
 {
     if ( !ght || !ght->count )
-        return SIZE_MAX;
+        return INVALID_CURSOR;
 
     ghtable_cursor cursor = 0;
     ghtable_entry* first_entry = ght->table;
@@ -61,47 +49,11 @@ ghtable_cursor ghtable_new_cursor(ghtable* ght)
     return cursor;
 }
 
-static inline void iterator_move(ghtable_iterator* iterator, char direction)
-{
-    if ( !iterator->entry )
-        return;
-
-    ghtable_entry* table = iterator->ght->table;
-    size_t abs_index = iterator->entry - table;
-    size_t ght_capacity = iterator->ght->capacity;
-
-    if ( direction == NEXT )
-    {
-        while ( abs_index < ght_capacity )
-        {
-            if ( table[++abs_index].key )
-            {
-                iterator->entry = table + abs_index;
-                return;
-            }
-        }
-    }
-    else
-    {
-        while ( abs_index > 0 )
-        {
-            if ( table[--abs_index].key )
-            {
-                iterator->entry = table + abs_index;
-                return;
-            }
-        }
-    }
-
-    iterator->entry = NULL;
-    return;
-}
-
-static inline void move_cursor(ghtable* ght, ghtable_cursor* cursor, char direction)
+static inline void cursor_move(ghtable* ght, ghtable_cursor* cursor, char direction)
 {
     ghtable_cursor cursor_value = *cursor;
 
-    if ( cursor_value == SIZE_MAX )
+    if ( cursor_value == INVALID_CURSOR )
         return;
 
     size_t ght_capacity = ght->capacity;
@@ -130,19 +82,19 @@ static inline void move_cursor(ghtable* ght, ghtable_cursor* cursor, char direct
         }
     }
 
-    *cursor = SIZE_MAX;
+    *cursor = INVALID_CURSOR;
     return;
 }
 
-size_t ghtable_iterator_position(ghtable_iterator* it)
+size_t ghtable_cursor_position(ghtable* ght, ghtable_cursor* cursor)
 {
-    if ( !it || !it->entry )
-        return SIZE_MAX;
+    if ( !ght || !cursor || *cursor == INVALID_CURSOR)
+        return INVALID_CURSOR;
 
-    const ghtable_entry* start = it->ght->table;
-    const ghtable_entry* entry = it->entry;
+    const ghtable_entry* start = ght->table;
+    const ghtable_entry* entry = &start[*cursor];
     size_t pos = 0;
-    // [ 0, 0, H, 1, 0, 1, 1 ]
+
     while ( start != entry )
     {
         if ( start->key )
@@ -154,40 +106,29 @@ size_t ghtable_iterator_position(ghtable_iterator* it)
     return pos;
 }
 
-size_t ghtable_cursor_position(ghtable* ght, ghtable_cursor* cursor)
+ghtable_cursor ghtable_cursor_seek(ghtable* ght, ghtable_cursor* cursor, size_t position)
 {
     if ( !ght || !cursor )
-        return SIZE_MAX;
+        return INVALID_CURSOR;
 
-    ghtable_cursor curor_value = *cursor;
-    if ( curor_value == SIZE_MAX )
-        return SIZE_MAX;
+    if ( position >= ght->count )
+        return INVALID_CURSOR;
 
-    /////////////////
-    return SIZE_MAX;
+    ghtable_cursor cursor_value = *cursor;
+    if ( cursor_value == INVALID_CURSOR )
+        return INVALID_CURSOR;
 
-}
-
-ghtable_iterator* ghtable_iterator_seek(ghtable_iterator* it, size_t position)
-{
-    if ( !it || !it->entry )
-        return NULL;
-
-    if ( position >= it->ght->capacity )
-        return NULL;
-
-    size_t current_position = ghtable_iterator_position(it);
+    size_t current_position = ghtable_cursor_position(ght, cursor);
     if ( current_position == position )
-        return it;
+        return cursor_value;
 
-    ghtable_entry* table = it->ght->table;
-    size_t abs_index = it->entry - table;
+    ghtable_entry* table = ght->table;
 
     if ( current_position < position )
     {
         while ( current_position < position )
         {
-            if ( table[++abs_index].key )
+            if ( table[++cursor_value].key )
                 current_position++;
         }
     }
@@ -195,57 +136,79 @@ ghtable_iterator* ghtable_iterator_seek(ghtable_iterator* it, size_t position)
     {
         while ( current_position > position )
         {
-            if ( table[--abs_index].key )
+            if ( table[--cursor_value].key )
                 current_position--;
         }
     }
-    it->entry = table + abs_index;
+    *cursor = cursor_value;
 
-    return it;
+    return cursor_value;
 }
 
-const void* ghtable_next(ghtable_iterator* it)
+const void* ghtable_next(ghtable* ght, ghtable_cursor* cursor)
 {
-    if ( !it || !it->entry )
+    if ( !ght || !cursor || *cursor == INVALID_CURSOR )
         return NULL;
 
-    const void* value_ptr = it->entry->value;
-    iterator_move(it, NEXT);
+    const void* value_ptr = ght->table[*cursor].value;
+    cursor_move(ght, cursor, NEXT);
 
     return value_ptr;
 }
 
-const void* ghtable_prev(ghtable_iterator* it)
+const void* ghtable_prev(ghtable* ght, ghtable_cursor* cursor)
 {
-    if ( !it || !it->entry )
+    if ( !ght || !cursor || *cursor == INVALID_CURSOR )
         return NULL;
 
-    const void* value_ptr = it->entry->value;
-    iterator_move(it, PREV);
+    const void* value_ptr = ght->table[*cursor].value;
+    cursor_move(ght, cursor, PREV);
 
     return value_ptr;
 }
 
-const void* ghtable_next_key(ghtable_iterator* it)
+const void* ghtable_next_key(ghtable* ght, ghtable_cursor* cursor)
 {
-    if ( !it || !it->entry )
+    if ( !ght || !cursor || *cursor == INVALID_CURSOR )
         return NULL;
 
-    const void* value_ptr = it->entry->key;
-    iterator_move(it, NEXT);
+    const void* value_ptr = ght->table[*cursor].key;
+    cursor_move(ght, cursor, NEXT);
 
     return value_ptr;
 }
 
-const void* ghtable_prev_key(ghtable_iterator* it)
+const void* ghtable_prev_key(ghtable* ght, ghtable_cursor* cursor)
 {
-    if ( !it || !it->entry )
+    if ( !ght || !cursor || *cursor == INVALID_CURSOR )
         return NULL;
 
-    const void* value_ptr = it->entry->key;
-    iterator_move(it, PREV);
+    const void* value_ptr = ght->table[*cursor].key;
+    cursor_move(ght, cursor, PREV);
 
     return value_ptr;
+}
+
+entry_view ghtable_next_entry_view(ghtable* ght, ghtable_cursor* cursor)
+{
+    if ( !ght || !cursor || *cursor == INVALID_CURSOR )
+        return (entry_view){NULL, NULL, 0, 0};
+
+    ghtable_entry entry = ght->table[*cursor];
+    cursor_move(ght, cursor, NEXT);
+
+    return (entry_view){entry.key, entry.value, entry.key_len, entry.value_size};
+}
+
+entry_view ghtable_prev_entry_view(ghtable* ght, ghtable_cursor* cursor)
+{
+    if ( !ght || !cursor || *cursor == INVALID_CURSOR )
+        return (entry_view){NULL, NULL, 0, 0};
+
+    ghtable_entry entry = ght->table[*cursor];
+    cursor_move(ght, cursor, PREV);
+
+    return (entry_view){entry.key, entry.value, entry.key_len, entry.value_size};
 }
 
 static inline key_list_entry* allocate_key_list(size_t capacity)

@@ -2,11 +2,14 @@
 #define GHTABLE_LIB_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define LOAD_FACTOR 0.5
 
 #define ORD 'o'
 #define UNORD 'u'
+
+#define INVALID_CURSOR SIZE_MAX
 
 enum ghtable_del_err
 {
@@ -28,15 +31,17 @@ typedef struct
 
 } value_view;
 
-typedef struct ghtable ghtable;
-typedef struct ghtable_entry ghtable_entry;
-
 typedef struct
 {
-    const ghtable* ght;
-    const ghtable_entry* entry;
+    const void* key;
+    const void* value;
+    size_t key_len;
+    size_t val_size;
 
-} ghtable_iterator;
+} entry_view;
+
+typedef struct ghtable ghtable;
+typedef struct ghtable_entry ghtable_entry;
 
 typedef size_t ghtable_cursor;
 
@@ -75,14 +80,14 @@ size_t ghtable_indexn(ghtable* ght, const void* key, size_t key_len);
 
 void ghtable_drop_keylist(ghtable* ght);
 
-ghtable_iterator ghtable_new_iterator(ghtable* ght);
-size_t ghtable_iterator_position(ghtable_iterator* it);
-ghtable_iterator* ghtable_iterator_seek(ghtable_iterator* it, size_t position);
+ghtable_cursor ghtable_new_cursor(ghtable* ght);
+size_t ghtable_cursor_position(ghtable* ght, ghtable_cursor* cursor);
+ghtable_cursor ghtable_cursor_seek(ghtable* ght, ghtable_cursor* cursor, size_t position);
 
-const void* ghtable_next(ghtable_iterator* it);
-const void* ghtable_prev(ghtable_iterator* it);
-const void* ghtable_next_key(ghtable_iterator* it);
-const void* ghtable_prev_key(ghtable_iterator* it);
+const void* ghtable_next(ghtable* ght, ghtable_cursor* cursor);
+const void* ghtable_prev(ghtable* ght, ghtable_cursor* cursor);
+const void* ghtable_next_key(ghtable* ght, ghtable_cursor* cursor);
+const void* ghtable_prev_key(ghtable* ght, ghtable_cursor* cursor);
 
 void* ghtable_cv(ghtable* ght, const char* key, void* buffer);
 void* ghtable_cvn(ghtable* ght, const void* key, size_t key_len, void* buffer);
