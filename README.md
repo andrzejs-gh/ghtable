@@ -840,7 +840,7 @@ Same as [ghtable_del](#-ghtable_del-), but takes a byte key instead of a string 
 
 ---
 
-### Iteration
+## Iteration
 
 ### ** **ghtable_new_cursor** **
 
