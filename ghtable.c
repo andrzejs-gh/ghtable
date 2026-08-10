@@ -205,10 +205,10 @@ entry_view ghtable_prev_entry_view(ghtable* ght, ghtable_cursor* cursor)
     if ( !ght || !cursor || *cursor == INVALID_CURSOR )
         return (entry_view){NULL, NULL, 0, 0};
 
-    ghtable_entry entry = ght->table[*cursor];
+    ghtable_entry* entry = &ght->table[*cursor];
     cursor_move(ght, cursor, PREV);
 
-    return (entry_view){entry.key, entry.value, entry.key_len, entry.value_size};
+    return (entry_view){entry->key, entry->value, entry->key_len, entry->value_size};
 }
 
 static inline key_list_entry* allocate_key_list(size_t capacity)
@@ -467,6 +467,20 @@ const void* ghtable_nth(ghtable* ght, size_t index)
     key_list_entry kl_entry = ght->keys[index];
 
     return ghtable_getn(ght, kl_entry.key, kl_entry.key_len);
+}
+
+entry_view ghtable_nth_entry_view(ghtable* ght, size_t index)
+{
+    if ( !ght || !ght->keys || !ght->count )
+        return (entry_view){NULL, NULL, 0, 0};
+
+    if ( index >= ght->count )
+        return (entry_view){NULL, NULL, 0, 0};
+
+    key_list_entry kl_entry = ght->keys[index];
+    ghtable_entry* entry = get_entry(ght, kl_entry.key, kl_entry.key_len);
+
+    return (entry_view){entry->key, entry->value, entry->key_len, entry->value_size};
 }
 
 static inline size_t get_key_index(ghtable* ght, const void* key, size_t key_len)

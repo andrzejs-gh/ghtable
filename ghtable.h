@@ -88,6 +88,8 @@ const void* ghtable_next(ghtable* ght, ghtable_cursor* cursor);
 const void* ghtable_prev(ghtable* ght, ghtable_cursor* cursor);
 const void* ghtable_next_key(ghtable* ght, ghtable_cursor* cursor);
 const void* ghtable_prev_key(ghtable* ght, ghtable_cursor* cursor);
+entry_view ghtable_next_entry_view(ghtable* ght, ghtable_cursor* cursor);
+entry_view ghtable_prev_entry_view(ghtable* ght, ghtable_cursor* cursor);
 
 void* ghtable_cv(ghtable* ght, const char* key, void* buffer);
 void* ghtable_cvn(ghtable* ght, const void* key, size_t key_len, void* buffer);
