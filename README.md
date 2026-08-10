@@ -132,7 +132,15 @@ free_ghtable(ght);
 
 ### Iteration
 
-
+- [ghtable_new_cursor](#-ghtable_new_cursor-)
+- [ghtable_cursor_position](#-ghtable_cursor_position-)
+- [ghtable_cursor_seek](#-ghtable_cursor_seek-)
+- [ghtable_next](#-ghtable_next-)
+- [ghtable_prev](#-ghtable_prev-)
+- [ghtable_next_key](#-ghtable_next_key-)
+- [ghtable_prev_key](#-ghtable_prev_key-)
+- [ghtable_next_entry_view](#-ghtable_next_entry_view-)
+- [ghtable_prev_entry_view](#-ghtable_prev_entry_view-)
 
 ### Manual resizing and dropping key list
 
