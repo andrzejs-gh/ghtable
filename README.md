@@ -715,7 +715,7 @@ If `ghtable` is unordered, the function returns:
 entry_view ghtable_nth_entry_view(ghtable* ght, size_t index);
 ```
 
-Returns nth entry's `entry_view` struct, which is defined as:
+Returns `entry_view` struct for nth entry. The struct is defined as:
 ```c
 // ghtable.h
 
