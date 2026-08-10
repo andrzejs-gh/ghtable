@@ -194,10 +194,10 @@ entry_view ghtable_next_entry_view(ghtable* ght, ghtable_cursor* cursor)
     if ( !ght || !cursor || *cursor == INVALID_CURSOR )
         return (entry_view){NULL, NULL, 0, 0};
 
-    ghtable_entry entry = ght->table[*cursor];
+    ghtable_entry* entry = &ght->table[*cursor];
     cursor_move(ght, cursor, NEXT);
 
-    return (entry_view){entry.key, entry.value, entry.key_len, entry.value_size};
+    return (entry_view){entry->key, entry->value, entry->key_len, entry->value_size};
 }
 
 entry_view ghtable_prev_entry_view(ghtable* ght, ghtable_cursor* cursor)
@@ -432,6 +432,30 @@ value_view ghtable_viewn(ghtable* ght, const void* key, size_t key_len)
         return (value_view){entry->value, entry->value_size};
     else
         return (value_view){NULL, 0};
+}
+
+entry_view ghtable_entry_view(ghtable* ght, const char* key)
+{
+    if ( !ght || !key )
+        return (entry_view){NULL, NULL, 0, 0};
+
+    ghtable_entry* entry;
+    if ( (entry = get_entry(ght, key, strlen(key))) )
+        return (entry_view){entry->key, entry->key, entry->key_len, entry->value_size};
+    else
+        return (entry_view){NULL, NULL, 0, 0};
+}
+
+entry_view ghtable_entry_viewn(ghtable* ght, const void* key, size_t key_len)
+{
+    if ( !ght || !key || !key_len )
+        return (entry_view){NULL, NULL, 0, 0};
+
+    ghtable_entry* entry;
+    if ( (entry = get_entry(ght, key, key_len)) )
+        return (entry_view){entry->key, entry->key, entry->key_len, entry->value_size};
+    else
+        return (entry_view){NULL, NULL, 0, 0};
 }
 
 key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index)

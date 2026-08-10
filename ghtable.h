@@ -65,6 +65,8 @@ const void* ghtable_get(ghtable* ght, const char* key);
 const void* ghtable_getn(ghtable* ght, const void* key, size_t key_size);
 value_view ghtable_view(ghtable* ght, const char* key);
 value_view ghtable_viewn(ghtable* ght, const void* key, size_t key_len);
+entry_view ghtable_entry_view(ghtable* ght, const char* key);
+entry_view ghtable_entry_viewn(ghtable* ght, const void* key, size_t key_len);
 
 const void* ghtable_set(ghtable* ght, const char* key, void* value, size_t size);
 const void* ghtable_setn(ghtable* ght, const void* key, size_t key_size, void* value, size_t value_size);
@@ -75,6 +77,7 @@ int ghtable_deln(ghtable* ght, const void* key, size_t key_len);
 const void* ghtable_nth(ghtable* ght, size_t index);
 const void* ghtable_nth_key(ghtable* ght, size_t index);
 key_list_entry ghtable_nth_kl_entry(ghtable* ght, size_t index);
+entry_view ghtable_nth_entry_view(ghtable* ght, size_t index);
 size_t ghtable_index(ghtable* ght, const char* key);
 size_t ghtable_indexn(ghtable* ght, const void* key, size_t key_len);
 
