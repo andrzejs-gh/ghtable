@@ -89,7 +89,7 @@ static inline void cursor_move(ghtable* ght, ghtable_cursor* cursor, char direct
 size_t ghtable_cursor_position(ghtable* ght, ghtable_cursor* cursor)
 {
     if ( !ght || !cursor || *cursor == INVALID_CURSOR)
-        return INVALID_CURSOR;
+        return SIZE_MAX;
 
     const ghtable_entry* start = ght->table;
     const ghtable_entry* entry = &start[*cursor];

@@ -130,6 +130,10 @@ free_ghtable(ght);
 - [ghtable_del](#-ghtable_del-)
 - [ghtable_deln](#-ghtable_deln-)
 
+### Iteration
+
+
+
 ### Manual resizing and dropping key list
 
 - [ghtable_grow](#-ghtable_grow-)
@@ -829,6 +833,260 @@ Same as [ghtable_del](#-ghtable_del-), but takes a byte key instead of a string 
 - **failure**: an error code:
     - `TABLE_OR_KEY_NULL` ( 1 ) 
     - `ENTRY_NOT_FOUND` ( 2 )
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### Iteration
+
+### ** **ghtable_new_cursor** **
+
+```c
+ghtable_cursor ghtable_new_cursor(ghtable* ght);
+```
+
+The hash table can be iterated over (both forward and in reverse, see methods below) using `ghtable_cursor`. The function returns new cursor pointing to the first element. If the hash table is empty, the function returns `INVALID_CURSOR`. 
+A valid cursor can be pointed to arbitrary position (see ghtable_cursor_seek), but once the cursor is moved beyond hash table bounds in either direction, it becomes exhausted and `INVALID_CURSOR`.
+
+### Arguments:
+- `ghtable* ght` 
+
+### Returns:
+- **success**: `ghtable_cursor` pointing to the first entry
+- **failure**: `INVALID_CURSOR`
+    - `ght == NULL`
+    - hash table is empty
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_cursor_position** **
+
+```c
+size_t ghtable_cursor_position(ghtable* ght, ghtable_cursor* cursor);
+```
+
+Returns cursor position. If the cursor value is `INVALID_CURSOR`, the function returns `SIZE_MAX`.
+
+### Arguments:
+- `ghtable* ght` 
+- `ghtable_cursor* cursor`
+
+### Returns:
+- **success**: `size_t` cursor position
+- **failure**: `SIZE_MAX`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_cursor_seek** **
+
+```c
+ghtable_cursor ghtable_cursor_seek(ghtable* ght, ghtable_cursor* cursor, size_t position);
+```
+
+Moves the cursor to specified position. Returns modified cursor by value, on failure the cursor becomes `INVALID_CURSOR`. 
+
+### Arguments:
+- `ghtable* ght` 
+- `ghtable_cursor* cursor`
+- `size_t position`
+
+### Returns:
+- **success**: `ghtable_cursor` modified cursor
+- **failure**: `INVALID_CURSOR`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
+    - `position` is out of bounds (>= hash table count)
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_next** **
+
+```c
+const void* ghtable_next(ghtable* ght, ghtable_cursor* cursor);
+```
+
+Takes the cursor and returns ptr to the **next** value. Before returning, the cursor is moved one position forward. If the cursor is exhausted/invalid, the function returns `NULL`.
+
+### Arguments:
+- `ghtable* ght` 
+- `ghtable* cursor`
+
+### Returns:
+- **success**: `const void*` pointer to the **next** value
+- **failure**: `NULL`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_prev** **
+
+```c
+const void* ghtable_prev(ghtable* ght, ghtable_cursor* cursor);
+```
+
+Takes the cursor and returns ptr to the **previous** value. Before returning, the cursor is moved one position backward. If the cursor is exhausted/invalid, the function returns `NULL`.
+
+### Arguments:
+- `ghtable* ght`
+- `ghtable* cursor`
+
+### Returns:
+- **success**: `const void*` pointer to the **previous** value
+- **failure**: `NULL`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_next_key** **
+
+```c
+const void* ghtable_next_key(ghtable* ght, ghtable_cursor* cursor);
+```
+
+Takes the cursor and returns ptr to the **next** key. Before returning, the cursor is moved one position forward. If the cursor is exhausted/invalid, the function returns `NULL`.
+
+### Arguments:
+- `ghtable* ght`
+- `ghtable* cursor`
+
+### Returns:
+- **success**: `const void*` pointer to the **next** key
+- **failure**: `NULL`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_prev_key** **
+
+```c
+const void* ghtable_prev_key(ghtable* ght, ghtable_cursor* cursor);
+```
+
+Takes the cursor and returns ptr to the **prev** key. Before returning, the cursor is moved one position backward. If the cursor is exhausted/invalid, the function returns `NULL`.
+
+### Arguments:
+- `ghtable* ght`
+- `ghtable* cursor`
+
+### Returns:
+- **success**: `const void*` pointer to the **prev** key
+- **failure**: `NULL`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_next_entry_view** **
+
+```c
+entry_view ghtable_next_entry_view(ghtable* ght, ghtable_cursor* cursor);
+```
+
+Takes the cursor and returns `entry_view` struct for the **next** entry:
+```c
+// ghtable.h
+
+typedef struct
+{
+    const void* key;
+    const void* value;
+    size_t key_len;
+    size_t val_size;
+
+} entry_view;
+```
+On failure the function returns `(entry_view){NULL, NULL, 0, 0}`.
+
+### Arguments:
+- `ghtable* ght` 
+- `ghtable_cursor* cursor`
+
+### Returns:
+- **success**: `entry_view` of the **next** entry
+- **failure**: `(entry_view){NULL, NULL, 0, 0}`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_prev_entry_view** **
+
+```c
+entry_view ghtable_prev_entry_view(ghtable* ght, ghtable_cursor* cursor);
+```
+
+Takes the cursor and returns `entry_view` struct for the **previous** entry:
+```c
+// ghtable.h
+
+typedef struct
+{
+    const void* key;
+    const void* value;
+    size_t key_len;
+    size_t val_size;
+
+} entry_view;
+```
+On failure the function returns `(entry_view){NULL, NULL, 0, 0}`.
+
+### Arguments:
+- `ghtable* ght` 
+- `ghtable_cursor* cursor`
+
+### Returns:
+- **success**: `entry_view` of the **previous** entry
+- **failure**: `(entry_view){NULL, NULL, 0, 0}`
+    - `ght == NULL`
+    - `cursor == NULL`
+    - `*cursor == INVALID_CURSOR`
 
 <p align="right">
 <a href="#full-method-list">GO TO METHOD LIST ^</a>
