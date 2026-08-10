@@ -115,6 +115,8 @@ free_ghtable(ght);
 - [ghtable_getn](#-ghtable_getn-)
 - [ghtable_view](#-ghtable_view-)
 - [ghtable_viewn](#-ghtable_viewn-)
+- [ghtable_entry_view](#-ghtable_entry_view-)
+- [ghtable_entry_viewn](#-ghtable_entry_viewn-)
 - [ghtable_nth](#-ghtable_nth-)
 - [ghtable_nth_key](#-ghtable_nth_key-)
 - [ghtable_nth_kl_entry](#-ghtable_nth_kl_entry-)
@@ -521,6 +523,91 @@ If entry is not found, the function returns:
 ### Returns:
 - **success**: `value_view` view struct
 - **failure**: `value_view` empty view struct `(value_view){NULL, 0}`
+    - entry not found
+    - `ght == NULL`
+    - `key == NULL`
+    - `key_len == 0`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_entry_view** **
+
+```c
+entry_view ghtable_entry_view(ghtable* ght, const char* key);
+```
+
+Takes a string key and returns `entry_view` struct, which is defined as:
+```c
+// ghtable.h
+
+typedef struct
+{
+    const void* key;
+    const void* value;
+    size_t key_len;
+    size_t val_size;
+
+} entry_view;
+```
+If entry is not found, the function returns:
+```c
+(entry_view){NULL, NULL, 0, 0};
+```
+
+### Arguments:
+- `ghtable* ght` 
+- `const char* key`
+
+### Returns:
+- **success**: `entry_view` struct
+- **failure**: `entry_view` empty struct `(entry_view){NULL, NULL, 0, 0}`
+    - entry not found
+    - empty `key`
+    - `ght == NULL`
+    - `key == NULL`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_entry_viewn** **
+
+```c
+entry_view ghtable_entry_viewn(ghtable* ght, const void* key, size_t key_len);
+```
+
+Same as [ghtable_entry_view](#-ghtable_view-) but takes a byte key instead of a string key and returns `entry_view` struct, which is defined as:
+```c
+// ghtable.h
+
+typedef struct
+{
+    const void* key;
+    const void* value;
+    size_t key_len;
+    size_t val_size;
+
+} entry_view;
+```
+If entry is not found, the function returns:
+```c
+(entry_view){NULL, NULL, 0, 0};
+```
+
+### Arguments:
+- `ghtable* ght` 
+- `const void* key`
+- `size_t key_len`
+
+### Returns:
+- **success**: `entry_view` view struct
+- **failure**: `entry_view` empty view struct `(entry_view){NULL, NULL, 0, 0}`
     - entry not found
     - `ght == NULL`
     - `key == NULL`
