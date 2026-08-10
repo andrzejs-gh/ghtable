@@ -120,6 +120,7 @@ free_ghtable(ght);
 - [ghtable_nth](#-ghtable_nth-)
 - [ghtable_nth_key](#-ghtable_nth_key-)
 - [ghtable_nth_kl_entry](#-ghtable_nth_kl_entry-)
+- [ghtable_nth_entry_view](#-ghtable_nth_entry_view-)
 - [ghtable_index](#-ghtable_index-)
 - [ghtable_indexn](#-ghtable_indexn-)
 - [ghtable_cv](#-ghtable_cv-)
@@ -686,7 +687,7 @@ typedef struct
 
 } key_list_entry;
 ```
-If the `ghtable` is unordered, the function returns:
+If `ghtable` is unordered, the function returns:
 ```c
 (key_list_entry){NULL, 0};
 ```
@@ -698,6 +699,47 @@ If the `ghtable` is unordered, the function returns:
 ### Returns:
 - **success**: `key_list_entry` nth key list entry
 - **failure**: `key_list_entry` empty entry `(key_list_entry){NULL, 0}`
+    - invalid index
+    - `ghtable` is unordered
+    - `ght == NULL`
+
+<p align="right">
+<a href="#full-method-list">GO TO METHOD LIST ^</a>
+</p>
+
+---
+
+### ** **ghtable_nth_entry_view** **
+
+```c
+entry_view ghtable_nth_entry_view(ghtable* ght, size_t index);
+```
+
+Returns nth entry's `entry_view` struct, which is defined as:
+```c
+// ghtable.h
+
+typedef struct
+{
+    const void* key;
+    const void* value;
+    size_t key_len;
+    size_t val_size;
+
+} entry_view;
+```
+If `ghtable` is unordered, the function returns:
+```c
+(entry_view){NULL, NULL, 0, 0};
+```
+
+### Arguments:
+- `ghtable* ght` 
+- `size_t index`
+
+### Returns:
+- **success**: nth entry's `entry_view`
+- **failure**: `(entry_view){NULL, NULL, 0, 0}`
     - invalid index
     - `ghtable` is unordered
     - `ght == NULL`
