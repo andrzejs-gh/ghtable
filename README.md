@@ -582,7 +582,7 @@ If entry is not found, the function returns:
 entry_view ghtable_entry_viewn(ghtable* ght, const void* key, size_t key_len);
 ```
 
-Same as [ghtable_entry_view](#-ghtable_view-) but takes a byte key instead of a string key and returns `entry_view` struct, which is defined as:
+Same as [ghtable_entry_view](#-ghtable_entry_view-) but takes a byte key instead of a string key and returns `entry_view` struct, which is defined as:
 ```c
 // ghtable.h
 
