@@ -1161,7 +1161,7 @@ Takes the cursor and returns ptr to the **prev** key. Before returning, the curs
 entry_view ghtable_next_entry_view(ghtable* ght, ghtable_cursor* cursor);
 ```
 
-Takes the cursor and returns `entry_view` struct for the **next** entry:
+Takes the cursor and returns `entry_view` struct for the **next** entry. Before returning, the cursor is moved one position forward.
 ```c
 // ghtable.h
 
@@ -1199,7 +1199,7 @@ On failure the function returns `(entry_view){NULL, NULL, 0, 0}`.
 entry_view ghtable_prev_entry_view(ghtable* ght, ghtable_cursor* cursor);
 ```
 
-Takes the cursor and returns `entry_view` struct for the **previous** entry:
+Takes the cursor and returns `entry_view` struct for the **previous** entry. Before returning, the cursor is moved one position backward.
 ```c
 // ghtable.h
 
