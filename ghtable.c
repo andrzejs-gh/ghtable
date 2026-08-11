@@ -441,7 +441,7 @@ entry_view ghtable_entry_view(ghtable* ght, const char* key)
 
     ghtable_entry* entry;
     if ( (entry = get_entry(ght, key, strlen(key))) )
-        return (entry_view){entry->key, entry->key, entry->key_len, entry->value_size};
+        return (entry_view){entry->key, entry->value, entry->key_len, entry->value_size};
     else
         return (entry_view){NULL, NULL, 0, 0};
 }
@@ -453,7 +453,7 @@ entry_view ghtable_entry_viewn(ghtable* ght, const void* key, size_t key_len)
 
     ghtable_entry* entry;
     if ( (entry = get_entry(ght, key, key_len)) )
-        return (entry_view){entry->key, entry->key, entry->key_len, entry->value_size};
+        return (entry_view){entry->key, entry->value, entry->key_len, entry->value_size};
     else
         return (entry_view){NULL, NULL, 0, 0};
 }
