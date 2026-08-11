@@ -370,14 +370,18 @@ static inline uint64_t get_hash(const void* key, size_t n)
 static inline ghtable_entry* get_entry(ghtable* ght, const void* key, size_t key_size)
 {
     size_t ght_capacity = ght->capacity;
-    size_t index = get_hash(key, key_size) % ght_capacity;
+    uint64_t hash = get_hash(key, key_size);
+    size_t index = hash % ght_capacity;
     ghtable_entry* table = ght->table;
     const void* entry_key;
 
     while ( (entry_key = table[index].key) )
     {
-        if ( table[index].key_len == key_size && !memcmp(entry_key, key, key_size) )
+        if ( table[index].hash == hash && table[index].key_len == key_size &&
+             !memcmp(entry_key, key, key_size) )
+        {
             return &table[index];
+        }
 
         if ( ++index == ght_capacity )
             index = 0;
