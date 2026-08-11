@@ -1034,7 +1034,7 @@ Returns cursor position. If the cursor value is `INVALID_CURSOR`, the function r
 ghtable_cursor ghtable_cursor_seek(ghtable* ght, ghtable_cursor* cursor, size_t position);
 ```
 
-Moves the cursor to specified position modifying it. Returns modified cursor by value, on failure the cursor becomes `INVALID_CURSOR`. 
+Moves the cursor to specified position and returns it by value. On failure the cursor becomes `INVALID_CURSOR`. 
 
 ### Arguments:
 - `ghtable* ght` 
