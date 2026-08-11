@@ -1042,7 +1042,7 @@ Moves the cursor to specified position and returns it by value. On failure the c
 - `size_t position`
 
 ### Returns:
-- **success**: `ghtable_cursor` modified cursor
+- **success**: `ghtable_cursor` cursor
 - **failure**: `INVALID_CURSOR`
     - `ght == NULL`
     - `cursor == NULL`
