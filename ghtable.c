@@ -684,7 +684,7 @@ void ghtable_drop_keylist(ghtable* ght)
 
 static inline key_list_entry* add_key(ghtable* ght, const void* key, size_t key_size)
 {
-    if ( ght->count == ght->key_list_capacity )
+    if ( ght->key_list_capacity == ght->count )
     {
         key_list_entry* list = realloc(ght->keys,
                                        2*ght->count*sizeof(key_list_entry));
