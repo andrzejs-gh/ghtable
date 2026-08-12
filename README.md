@@ -145,7 +145,7 @@ free_ghtable(ght);
 - [ghtable_next_entry_view](#-ghtable_next_entry_view-)
 - [ghtable_prev_entry_view](#-ghtable_prev_entry_view-)
 
-### Manual resizing and dropping key list
+### Manual resizing and dropping the key list (switching ordered -> unordered)
 
 - [ghtable_grow](#-ghtable_grow-)
 - [ghtable_shrink](#-ghtable_shrink-)
