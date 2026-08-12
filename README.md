@@ -99,7 +99,7 @@ free_ghtable(ght);
 - [new_ghtable](#-new_ghtable-)
 - [free_ghtable](#-free_ghtable-)
 
-### Attributes
+### Info
 
 - [ghtable_count](#-ghtable_count-)
 - [ghtable_capacity](#-ghtable_capacity-)
