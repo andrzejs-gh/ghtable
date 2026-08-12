@@ -22,6 +22,7 @@ General overview:
 - `LOAD_FACTOR` tweakable in the `ghtable.h`
 - dynamicaly growing 
 - minimizable to the optimal size defined by the `LOAD_FACTOR`
+- iterable in both directions and from arbitrary position
 
 <p align="right">
 <a href="#table-of-contents">GO TO TOP ^</a>
