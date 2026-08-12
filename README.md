@@ -228,7 +228,7 @@ Returns hash table element count.
 - `ghtable* ght` 
 
 ### Returns:
-- **success**: non-zero element count
+- **success**: `size_t` element count
 - **failure**: `0`
     - `ght == NULL`
 
