@@ -987,7 +987,8 @@ ghtable_cursor ghtable_new_cursor(ghtable* ght);
 ```
 
 The hash table can be iterated over (both forward and in reverse, see methods below) using `ghtable_cursor`. The function returns new cursor pointing to the first element. If the hash table is empty, the function returns `INVALID_CURSOR`. 
-A valid cursor can be pointed to arbitrary position (see ghtable_cursor_seek), but once the cursor is moved beyond hash table bounds in either direction, it becomes exhausted and `INVALID_CURSOR`.
+A valid cursor can be pointed to arbitrary position (see [ghtable_cursor_seek](#-ghtable_cursor_seek-)). 
+Once moved beyond hash table's bounds in either direction, the cursor becomes exhausted and is set to `INVALID_CURSOR`.
 
 ### Arguments:
 - `ghtable* ght` 
